@@ -1,0 +1,44 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from playwright.sync_api import APIRequestContext, APIResponse
+
+
+@dataclass
+class PaymentCall:
+    method: str
+    url: str
+    params: dict
+    http_status: int
+    body: dict | str
+    headers: dict
+
+
+class PaymentApi:
+    def __init__(self, request_context: APIRequestContext, base_url: str):
+        self._request = request_context
+        self._base_url = base_url.rstrip("/")
+        self.last_call: PaymentCall | None = None
+
+    def get_payment_methods(self, cell_number: str) -> tuple[int, dict | str]:
+        url = f"{self._base_url}/payment/"
+        params = {"CellNumber": cell_number}
+        response: APIResponse = self._request.get(url, params=params)
+        body = self._parse_body(response)
+        self.last_call = PaymentCall(
+            method="GET",
+            url=response.url,
+            params=params,
+            http_status=response.status,
+            body=body,
+            headers=dict(response.headers),
+        )
+        return response.status, body
+
+    @staticmethod
+    def _parse_body(response: APIResponse) -> dict | str:
+        try:
+            return response.json()
+        except Exception:
+            return response.text()
