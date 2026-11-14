@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.playwright/
+.env
+reports/*.html
+reports/*.xml
+!reports/.gitkeep
+*.pyc
+.idea/
+.vscode/
