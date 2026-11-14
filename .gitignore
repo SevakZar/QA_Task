@@ -7,6 +7,7 @@ __pycache__/
 reports/*.html
 reports/*.xml
 !reports/.gitkeep
+!reports/assets/
 *.pyc
 .idea/
 .vscode/

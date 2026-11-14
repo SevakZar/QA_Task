@@ -33,7 +33,41 @@ Standalone mock (optional):
 python -m mock_server.server --port 8080
 ```
 
-HTML report: `reports/report.html`. Each test logs the HTTP request and response in the terminal (`INFO checkout-api`) and as a **Request / Response** extra on that row in the HTML report.
+## HTML report
+
+Each `pytest` run writes a self-contained file: `reports/report.html` (also uploaded by GitHub Actions).
+
+### How it works
+
+`pytest-html` hooks into the pytest run. `pytest.ini` points `--html` at `reports/report.html`, inlines CSS/JS with `--self-contained-html`, and applies Digipay styling from `reports/assets/report.css`. `conftest.py` sets the title, environment metadata, summary blurb, and attaches the last HTTP call to every test row.
+
+Open the file in a browser after a run. You do not need a server.
+
+### What you get
+
+| Feature | Where |
+|---|---|
+| Digipay header, accent, footer, IBM Plex font | Full page (`report.css`) |
+| Environment (product, endpoint, approach, Python) | Top table |
+| Pass / fail / skip counts and filters | Summary |
+| Expandable rows | Results table |
+| Request URL, query, status, headers, body | **Request / Response** extra + **Captured log call** |
+| Rule id, method/option, actual value | Failure traceback on red rows |
+
+This is a static snapshot of one run, not a live GUI like Cypress.
+
+### Is this what companies use?
+
+**Yes, as a CI artifact** — many Python teams publish `pytest-html` (or Allure) on every pipeline so reviewers can open failures without rerunning locally.
+
+It is **not** the only or “most senior” report:
+
+- **pytest-html** — simple, one HTML file, common on GitHub Actions / GitLab. Good fit for this take-home.
+- **Allure** — more common in larger QA orgs (history, suites, retries, richer UI).
+- **ReportPortal / TestRail / Azure Test Plans** — when results must live in a test-management product.
+- **Playwright’s own HTML report** — default for Playwright **JS** browser tests; this suite is Python API-only, so `pytest-html` is the matching tool.
+
+Branding (logo, font, footer) is extra polish for stakeholders or a homework review. Internally, most companies keep the default Allure/pytest-html theme. The useful part for Digipay’s brief is still the **actionable request/response and rule messages**, not the chrome.
 
 ## CellNumber fixtures
 
@@ -60,7 +94,7 @@ HTML report: `reports/report.html`. Each test logs the HTTP request and response
 - `validators/` — schema, types, rules R1–R7
 - `testdata/` — response fixtures
 - `mock_server/` — fake `GET /payment/`
-- Failures name the rule, method/option, and actual value; request/response are logged on failed tests
+- Failures name the rule, method/option, and actual value; every test logs request/response
 
 ## Assumptions
 

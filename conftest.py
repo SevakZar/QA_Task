@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
 
 import pytest
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
+from pytest_metadata.plugin import metadata_key
 
 from apis.payment_api import PaymentApi
 from mock_server.server import MockServer
@@ -14,10 +14,7 @@ from validators.payment_validator import PaymentValidator
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 LOGGER = logging.getLogger("checkout-api")
-
-ROOT = Path(__file__).resolve().parent
 
 
 @pytest.fixture(scope="session")
@@ -59,6 +56,37 @@ def payment_api(request_context, base_url) -> PaymentApi:
 @pytest.fixture
 def validator() -> PaymentValidator:
     return PaymentValidator()
+
+
+def pytest_configure(config):
+    config.stash[metadata_key]["Product"] = "Digipay Checkout"
+    config.stash[metadata_key]["Suite"] = "Checkout Payment API"
+    config.stash[metadata_key]["Endpoint"] = "GET /payment/"
+    config.stash[metadata_key]["Approach"] = "A — local mock server + JSON fixtures"
+    config.stash[metadata_key]["Client"] = "Playwright APIRequestContext"
+
+
+def pytest_html_report_title(report):
+    report.title = "Digipay · Checkout Payment API"
+
+
+def pytest_html_results_summary(prefix, summary, postfix, session):
+    prefix.extend(
+        [
+            "<div class='digipay-banner'>"
+            "<span class='digipay-chip'>Practical task</span>"
+            "<span>Software QA Engineer · schema, business rules R1–R7, negative cases</span>"
+            "</div>"
+        ]
+    )
+    postfix.extend(
+        [
+            "<p class='digipay-footer-note'>"
+            "Expand a row for Captured log call and the Request / Response extra. "
+            "Failed tests also include the rule id, method/option, and actual value."
+            "</p>"
+        ]
+    )
 
 
 @pytest.hookimpl(hookwrapper=True)
