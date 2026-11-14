@@ -73,4 +73,4 @@ HTML report: `reports/report.html`.
 
 ## CI
 
-`.github/workflows/ci.yml` runs pytest and uploads `reports/report.html`.
+`.github/workflows/ci.yml` runs pytest on `ubuntu-24.04` and uploads `reports/report.html`. The runner is pinned because Playwright 1.55 does not ship Chromium for Ubuntu 26.04 (`ubuntu-latest`).
