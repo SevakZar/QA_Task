@@ -39,7 +39,7 @@ Each `pytest` run writes a self-contained file: `reports/report.html` (also uplo
 
 ### How it works
 
-`pytest-html` hooks into the pytest run. `pytest.ini` points `--html` at `reports/report.html`, inlines CSS/JS with `--self-contained-html`, and applies Digipay styling from `reports/assets/report.css`. `conftest.py` sets the title, environment metadata, summary blurb, and attaches the last HTTP call to every test row.
+`pytest-html` hooks into the pytest run. `pytest.ini` points `--html` at `reports/report.html`, inlines CSS/JS with `--self-contained-html`, and applies Digipay styling from `reports/assets/report.css`. The header uses `MyDigiPay.png` and brand blue `#0000FF` sampled from that file. If you replace the PNG, run `python reports/assets/_build_css.py` then `pytest` so the logo is embedded again. `conftest.py` sets the title, environment metadata, summary blurb, and attaches the last HTTP call to every test row.
 
 Open the file in a browser after a run. You do not need a server.
 
@@ -47,7 +47,7 @@ Open the file in a browser after a run. You do not need a server.
 
 | Feature | Where |
 |---|---|
-| Digipay header, accent, footer, IBM Plex font | Full page (`report.css`) |
+| Digipay logo (`MyDigiPay.png`), brand blue `#0000FF`, IBM Plex | Header / footer (`report.css`) |
 | Environment (product, endpoint, approach, Python) | Top table |
 | Pass / fail / skip counts and filters | Summary |
 | Expandable rows | Results table |
