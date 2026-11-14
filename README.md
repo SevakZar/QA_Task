@@ -91,19 +91,6 @@ Each test gets:
 
 Keep `reports/report.html` for a single-file screenshot. Use Allure when you want the standard QA report UI.
 
-### Is this what companies use?
-
-**Yes, as a CI artifact** — many Python teams publish `pytest-html` (or Allure) on every pipeline so reviewers can open failures without rerunning locally.
-
-It is **not** the only or “most senior” report:
-
-- **pytest-html** — simple, one HTML file, common on GitHub Actions / GitLab. Good fit for this take-home.
-- **Allure** — more common in larger QA orgs (history, suites, retries, richer UI).
-- **ReportPortal / TestRail / Azure Test Plans** — when results must live in a test-management product.
-- **Playwright’s own HTML report** — default for Playwright **JS** browser tests; this suite is Python API-only, so `pytest-html` is the matching tool.
-
-Branding (logo, font, footer) is extra polish for stakeholders or a homework review. Internally, most companies keep the default Allure/pytest-html theme. The useful part for Digipay’s brief is still the **actionable request/response and rule messages**, not the chrome.
-
 ## CellNumber fixtures
 
 | CellNumber  | Scenario |
