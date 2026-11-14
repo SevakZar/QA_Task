@@ -65,22 +65,17 @@ def validator() -> PaymentValidator:
 def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
-    if report.when != "call" or not report.failed:
+    if report.when != "call":
         return
     api = item.funcargs.get("payment_api")
     if api is None or api.last_call is None:
         return
-    call_data = api.last_call
-    LOGGER.error(
-        "Failed test diagnostics | rule-level assertion is in the traceback below\n"
-        "REQUEST %s %s params=%s\n"
-        "RESPONSE HTTP %s headers=%s\n"
-        "BODY %s",
-        call_data.method,
-        call_data.url,
-        call_data.params,
-        call_data.http_status,
-        call_data.headers,
-        call_data.body,
-    )
-    report.longrepr = f"{report.longrepr}\n\nLogged request/response for failed test:\n{call_data}"
+    http_log = api.last_call.as_log()
+    pytest_html = item.config.pluginmanager.getplugin("html")
+    extras = getattr(report, "extras", [])
+    if pytest_html is not None:
+        extras.append(pytest_html.extras.text(http_log, name="Request / Response"))
+        report.extras = extras
+    if report.failed:
+        LOGGER.error("Failed test diagnostics\n%s", http_log)
+        report.longrepr = f"{report.longrepr}\n\nRequest / response:\n{http_log}"

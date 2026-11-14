@@ -33,7 +33,7 @@ Standalone mock (optional):
 python -m mock_server.server --port 8080
 ```
 
-HTML report: `reports/report.html`.
+HTML report: `reports/report.html`. Each test logs the HTTP request and response in the terminal (`INFO checkout-api`) and as a **Request / Response** extra on that row in the HTML report.
 
 ## CellNumber fixtures
 
