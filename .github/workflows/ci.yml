@@ -19,11 +19,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m playwright install chromium
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
       - name: Run API suite
         run: pytest
-      - name: Upload HTML report
+      - name: Generate Allure report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate reports/allure-results -o reports/allure-report --clean
+      - name: Upload pytest-html report
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: pytest-html-report
           path: reports/report.html
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: allure-report
+          path: reports/allure-report

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
+from pathlib import Path
 
+import allure
 import pytest
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -56,6 +59,53 @@ def payment_api(request_context, base_url) -> PaymentApi:
 @pytest.fixture
 def validator() -> PaymentValidator:
     return PaymentValidator()
+
+
+@pytest.fixture(autouse=True)
+def allure_http_attachment(payment_api):
+    yield
+    call = payment_api.last_call
+    if call is None:
+        return
+    allure.attach(
+        call.as_log(),
+        name="Request / Response",
+        attachment_type=allure.attachment_type.TEXT,
+    )
+    if isinstance(call.body, dict):
+        allure.attach(
+            json.dumps(call.body, indent=2, ensure_ascii=False),
+            name="Response JSON",
+            attachment_type=allure.attachment_type.JSON,
+        )
+
+
+def pytest_bdd_before_scenario(request, feature, scenario):
+    allure.dynamic.epic("Digipay")
+    allure.dynamic.feature(feature.name)
+    allure.dynamic.story(scenario.name)
+    allure.dynamic.suite("Checkout Payment API")
+
+
+def pytest_sessionfinish(session, exitstatus):
+    results_dir = session.config.getoption("--alluredir")
+    if not results_dir:
+        return
+    path = Path(results_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "environment.properties").write_text(
+        "\n".join(
+            [
+                "Product=Digipay Checkout",
+                "Suite=Checkout Payment API",
+                "Endpoint=GET /payment/",
+                "Approach=A local mock server + JSON fixtures",
+                "Client=Playwright APIRequestContext",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def pytest_configure(config):

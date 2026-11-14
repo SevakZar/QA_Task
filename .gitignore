@@ -6,6 +6,8 @@ __pycache__/
 .env
 reports/*.html
 reports/*.xml
+reports/allure-results/
+reports/allure-report/
 !reports/.gitkeep
 !reports/assets/
 *.pyc

@@ -1,6 +1,8 @@
 # Checkout Payment API automation
+<p align="left">
+  <img src="MyDigiPay.png" width="30" alt="Test Execution"> API regression suite for Digipay checkout payment methods (`GET /payment/`).
+</p>
 
-API regression suite for Digipay checkout payment methods (`GET /payment/`).
 
 ## Approach
 
@@ -56,6 +58,39 @@ Open the file in a browser after a run. You do not need a server.
 
 This is a static snapshot of one run, not a live GUI like Cypress.
 
+## Allure report
+
+Allure is the richer report many QA teams use (suites, attachments, environment, filters). This suite writes Allure results on every `pytest` run.
+
+```bash
+pip install -r requirements.txt
+pytest
+```
+
+Results: `reports/allure-results/`. To open the UI you need **Java 21+** and the Allure CLI:
+
+```bash
+npm install -g allure-commandline
+allure serve reports/allure-results
+```
+
+Static HTML (same as CI):
+
+```bash
+allure generate reports/allure-results -o reports/allure-report --clean
+```
+
+Then open `reports/allure-report/index.html`.
+
+Each test gets:
+
+- Epic `Digipay`, feature from the Gherkin file, story = scenario name
+- **Request / Response** text attachment
+- **Response JSON** attachment
+- Environment: product, endpoint, mock approach
+
+Keep `reports/report.html` for a single-file screenshot. Use Allure when you want the standard QA report UI.
+
 ### Is this what companies use?
 
 **Yes, as a CI artifact** — many Python teams publish `pytest-html` (or Allure) on every pipeline so reviewers can open failures without rerunning locally.
@@ -107,4 +142,4 @@ Branding (logo, font, footer) is extra polish for stakeholders or a homework rev
 
 ## CI
 
-`.github/workflows/ci.yml` runs pytest on `ubuntu-24.04` and uploads `reports/report.html`. The runner is pinned because Playwright 1.55 does not ship Chromium for Ubuntu 26.04 (`ubuntu-latest`).
+`.github/workflows/ci.yml` runs pytest on `ubuntu-24.04` and uploads `reports/report.html` plus `reports/allure-report`. The runner is pinned because Playwright 1.55 does not ship Chromium for Ubuntu 26.04 (`ubuntu-latest`).
