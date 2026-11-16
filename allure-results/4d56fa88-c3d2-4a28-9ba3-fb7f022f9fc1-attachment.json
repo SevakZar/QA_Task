@@ -1,0 +1,13 @@
+{
+  "status": 200,
+  "payment_methods": [
+    {
+      "id": 8,
+      "type": "bnpl",
+      "title": "Credit Payment",
+      "is_clickable": true,
+      "source_id": 367,
+      "options": []
+    }
+  ]
+}

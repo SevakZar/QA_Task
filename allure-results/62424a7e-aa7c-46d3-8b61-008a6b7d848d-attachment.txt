@@ -1,0 +1,33 @@
+[32mINFO    [0m checkout-api:payment_api.py:45 REQUEST GET http://127.0.0.1:8080/payment/ params={'CellNumber': '09122222222'}
+[32mINFO    [0m checkout-api:payment_api.py:56 RESPONSE HTTP 200
+GET http://127.0.0.1:8080/payment/?CellNumber=09122222222
+Query: {'CellNumber': '09122222222'}
+HTTP 200
+Headers: {'server': 'BaseHTTP/0.6 Python/3.13.5', 'date': 'Mon, 16 Nov 2026 21:15:59 GMT', 'content-type': 'application/json', 'content-length': '321'}
+Body:
+{
+  "status": 200,
+  "payment_methods": [
+    {
+      "id": 1,
+      "type": "online",
+      "title": "Online Payment",
+      "is_clickable": true
+    },
+    {
+      "id": 11,
+      "type": "wallet",
+      "title": "Digital Wallet",
+      "is_clickable": true,
+      "source_id": 316
+    },
+    {
+      "id": 8,
+      "type": "bnpl",
+      "title": "Credit Payment",
+      "is_clickable": false,
+      "source_id": 367,
+      "options": []
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+[32mINFO    [0m checkout-api:payment_api.py:45 REQUEST GET http://127.0.0.1:8080/payment/ params={'CellNumber': '09125555555'}
+[32mINFO    [0m checkout-api:payment_api.py:56 RESPONSE HTTP 200
+GET http://127.0.0.1:8080/payment/?CellNumber=09125555555
+Query: {'CellNumber': '09125555555'}
+HTTP 200
+Headers: {'server': 'BaseHTTP/0.6 Python/3.13.5', 'date': 'Mon, 16 Nov 2026 21:15:59 GMT', 'content-type': 'application/json', 'content-length': '413'}
+Body:
+{
+  "status": 200,
+  "payment_methods": [
+    {
+      "id": 8,
+      "type": "bnpl",
+      "title": "Credit Payment",
+      "is_clickable": true,
+      "source_id": 367,
+      "options": [
+        {
+          "source_id": 386,
+          "title": "1 installment",
+          "credit": 50000000,
+          "is_active": true,
+          "is_default": true,
+          "price_type": "CASH_PRICE"
+        },
+        {
+          "source_id": 387,
+          "title": "3 installments",
+          "credit": 409361033,
+          "is_active": true,
+          "is_default": true,
+          "price_type": "CREDIT_PRICE"
+        }
+      ]
+    }
+  ]
+}
