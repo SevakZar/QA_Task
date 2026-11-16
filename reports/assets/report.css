@@ -198,6 +198,23 @@ html body > footer::after {
   display: block;
 }
 
+.http-dump {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  background: #0b0b1a;
+  color: #e8e8ff;
+  border-radius: 6px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+th:last-child:is(:has(+ *)),
+.col-links {
+  display: none;
+}
+
 #data-container {
   display: none;
 }

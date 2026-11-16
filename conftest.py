@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from html import escape
 from pathlib import Path
 
 import allure
@@ -120,6 +121,14 @@ def pytest_html_report_title(report):
     report.title = "Digipay · Checkout Payment API"
 
 
+def pytest_html_results_table_header(cells):
+    cells[:] = [cell for cell in cells if "Links" not in cell]
+
+
+def pytest_html_results_table_row(report, cells):
+    cells[:] = [cell for cell in cells if 'class="col-links"' not in cell]
+
+
 def pytest_html_results_summary(prefix, summary, postfix, session):
     prefix.extend(
         [
@@ -132,7 +141,7 @@ def pytest_html_results_summary(prefix, summary, postfix, session):
     postfix.extend(
         [
             "<p class='digipay-footer-note'>"
-            "Expand a row for Captured log call and the Request / Response extra. "
+            "Expand a row for Captured log call (request/response). "
             "Failed tests also include the rule id, method/option, and actual value."
             "</p>"
         ]
@@ -152,7 +161,11 @@ def pytest_runtest_makereport(item, call):
     pytest_html = item.config.pluginmanager.getplugin("html")
     extras = getattr(report, "extras", [])
     if pytest_html is not None:
-        extras.append(pytest_html.extras.text(http_log, name="Request / Response"))
+        extras.append(
+            pytest_html.extras.html(
+                f"<pre class='http-dump'>{escape(http_log)}</pre>"
+            )
+        )
         report.extras = extras
     if report.failed:
         LOGGER.error("Failed test diagnostics\n%s", http_log)

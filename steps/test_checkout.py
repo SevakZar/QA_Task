@@ -1,4 +1,4 @@
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import parsers, scenarios, given, when, then
 
 from validators.errors import RuleViolation
 

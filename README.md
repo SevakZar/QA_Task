@@ -53,7 +53,7 @@ Open the file in a browser after a run. You do not need a server.
 | Environment (product, endpoint, approach, Python) | Top table |
 | Pass / fail / skip counts and filters | Summary |
 | Expandable rows | Results table |
-| Request URL, query, status, headers, body | **Request / Response** extra + **Captured log call** |
+| Request URL, query, status, headers, body | Expanded row (`<pre>`) + **Captured log call** |
 | Rule id, method/option, actual value | Failure traceback on red rows |
 
 This is a static snapshot of one run, not a live GUI like Cypress.
@@ -93,20 +93,20 @@ Keep `reports/report.html` for a single-file screenshot. Use Allure when you wan
 
 ## CellNumber fixtures
 
-| CellNumber  | Scenario |
-|-------------|----------|
-| 09121111111 | S1 happy path |
-| 09122222222 | S2 BNPL blocked |
-| 09123333333 | S3 credit = 0 |
-| 09124444444 | S4 `is_active = false` |
-| 09125555555 | S5 two eligible defaults |
-| 09126666666 | S6 missing `type` / `title` |
-| 09127777777 | S7 wrong types |
-| 09128888888 | S8 HTTP 500 |
-| 09129999999 | S8 body `status != 200` |
-| 09120000009 | S9 wallet without `source_id` |
-| 09120000010 | S10 invalid `price_type` |
-| 09120000011 | S11 clickable BNPL, empty options |
+| CellNumber  | Scenario | Fixture |
+|-------------|----------|---------|
+| 09121111111 | S01 happy path | `testdata/01_positive/S01_happy_path.json` |
+| 09122222222 | S02 BNPL blocked | `testdata/01_positive/S02_bnpl_blocked.json` |
+| 09123333333 | S03 credit = 0 | `testdata/01_positive/S03_insufficient_credit.json` |
+| 09124444444 | S04 `is_active = false` | `testdata/01_positive/S04_non_active_option.json` |
+| 09125555555 | S05 two eligible defaults | `testdata/02_negative/S05_invalid_default.json` |
+| 09126666666 | S06 missing `type` / `title` | `testdata/02_negative/S06_missing_required_field.json` |
+| 09127777777 | S07 wrong types | `testdata/02_negative/S07_wrong_types.json` |
+| 09128888888 | S08 HTTP 500 | `testdata/02_negative/S09_http_500.json` |
+| 09129999999 | S09 body `status != 200` | `testdata/02_negative/S08_body_status.json` |
+| 09120000009 | S10 wallet without `source_id` | `testdata/02_negative/S10_missing_source_id.json` |
+| 09120000010 | S11 invalid `price_type` | `testdata/02_negative/S11_invalid_price_type.json` |
+| 09120000011 | S12 clickable BNPL, empty options | `testdata/02_negative/S12_empty_options_clickable.json` |
 
 ## Layout
 
@@ -114,7 +114,7 @@ Keep `reports/report.html` for a single-file screenshot. Use Allure when you wan
 - `steps/test_checkout.py` — Given / When / Then (pytest collects `test_*.py`)
 - `apis/` — Playwright client
 - `validators/` — schema, types, rules R1–R7
-- `testdata/` — response fixtures
+- `testdata/01_positive/` and `testdata/02_negative/` — response fixtures (`S01`–`S12`)
 - `mock_server/` — fake `GET /payment/`
 - Failures name the rule, method/option, and actual value; every test logs request/response
 
