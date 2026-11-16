@@ -1,132 +1,272 @@
-# Checkout Payment API automation
-<p align="left">
-  <img src="MyDigiPay.png" width="30" alt="Test Execution"> API regression suite for Digipay checkout payment methods (`GET /payment/`).
+# Checkout Payment API Automation
+
+<p align="center">
+  <img src="MyDigiPay.png" width="30" alt="Digipay Logo"><strong>  API Regression Test Suite for Digipay Checkout Payment Methods</strong>
+  <br>
+  Automated validation of <code>GET /payment/</code> using Python, Pytest and Playwright.
 </p>
 
+---
 
-## Approach
+## 1. Project Overview
 
-**A — local mock server**, backed by JSON fixtures in `testdata/`.
+This project provides an API regression test suite for validating Digipay checkout payment methods.
 
-Tests call a real HTTP endpoint through Playwright `APIRequestContext`. The mock maps `CellNumber` to a fixture so each scenario is deterministic and no live environment is required.
+The main objective is to verify API response structure, data integrity, payment eligibility, and business rules across different payment scenarios.
 
-Approach B (JSON-only, no HTTP) was not used: the brief asks for Playwright request testing, and HTTP status handling (S8) needs an actual response.
+The suite covers both successful and invalid responses through isolated test data, ensuring deterministic and repeatable test execution without depending on a live environment.
 
-## Install and run
+## 2. Test Approach
+
+**Approach A — Local Mock Server**
+
+The project uses a local HTTP mock server backed by JSON fixtures in `testdata/`.
+
+- Tests communicate with a real HTTP endpoint using Playwright `APIRequestContext`.
+- The mock server maps each `CellNumber` to its corresponding JSON fixture.
+- Each test scenario receives a controlled and predictable response.
+- No connection to the actual Digipay environment is required.
+
+## 3. Test Analysis & Design
+
+### 3.1 Requirement Analysis
+
+The API requirements were analyzed and translated into seven validation rules (R1–R7).
+
+The analysis focused on:
+
+- Required fields and expected data types.
+- Supported payment methods (`online`, `wallet`, `bnpl`).
+- Payment eligibility and active options.
+- Default payment method constraints.
+- Price type validation.
+- Wallet-specific requirements.
+- HTTP status and response body consistency.
+
+These rules are implemented independently in the `validators/` package to separate business validation from API communication.
+
+### 3.2 Test Design Techniques
+
+The test scenarios were designed using the following testing approaches:
+
+| Test Type | Coverage |
+|---|---|
+| Positive Testing | Valid payment methods and eligible payment options |
+| Negative Testing | Missing fields, invalid types and business rule violations |
+| Boundary & Edge Case Testing | Zero credit, empty options and multiple default methods |
+| API Error Handling | HTTP 500 and inconsistent response body status |
+
+### 3.3 Scenario Execution Flow
+
+Each scenario follows a consistent Given / When / Then structure:
+
+1. **Given:** Select a customer using a predefined `CellNumber` fixture.
+2. **When:** Send an HTTP GET request to `/payment/` using Playwright.
+3. **Then:** Validate HTTP status, response structure, data types and business rules.
+4. **Report:** Capture request/response details and provide rule-specific failure messages.
+
+Each fixture represents an isolated test condition, allowing scenarios to run independently and consistently.
+
+### 3.4 Test Organization
+
+The suite uses Gherkin feature files with `pytest-bdd` step definitions.
+
+This approach separates:
+- Business-readable test scenarios.
+- API request execution.
+- Response and business rule validation.
+- Test data and reporting.
+
+This separation improves maintainability and makes it easier to extend the suite with additional scenarios and validation rules.
+
+## 4. Installation & Execution
+
+### Requirements
+
+- Python
+- Playwright
+- Pytest
+- pytest-bdd
+- Other dependencies listed in `requirements.txt`
+
+### Setup
 
 ```bash
 python -m venv .venv
+
 # Windows
 .venv\Scripts\activate
+
 # macOS / Linux
 source .venv/bin/activate
 
 pip install -r requirements.txt
 python -m playwright install
-copy .env.example .env   # or: cp .env.example .env
+
+# Windows
+copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+```
+
+### Run Tests
+
+```bash
 pytest
 ```
 
-The mock server starts automatically for the pytest session on `BASE_URL` (default `http://127.0.0.1:8080`).
+The mock server starts automatically for the pytest session using `BASE_URL`.
 
-Standalone mock (optional):
+Default endpoint:
+
+`http://127.0.0.1:8080`
+
+### Standalone Mock Server (Optional)
 
 ```bash
 python -m mock_server.server --port 8080
 ```
 
-## HTML report
+## 5. Test Data & Scenarios
 
-Each `pytest` run writes a self-contained file: `reports/report.html` (also uploaded by GitHub Actions).
+Each test scenario uses a dedicated JSON fixture mapped to a unique `CellNumber`.
 
-### How it works
+| CellNumber | Scenario | Fixture |
+|---|---|---|
+| 09121111111 | S01 – Happy Path | `01_positive/S01_happy_path.json` |
+| 09122222222 | S02 – BNPL Blocked | `01_positive/S02_bnpl_blocked.json` |
+| 09123333333 | S03 – Zero Credit | `01_positive/S03_insufficient_credit.json` |
+| 09124444444 | S04 – Inactive Option | `01_positive/S04_non_active_option.json` |
+| 09125555555 | S05 – Multiple Default Methods | `02_negative/S05_invalid_default.json` |
+| 09126666666 | S06 – Missing Required Fields | `02_negative/S06_missing_required_field.json` |
+| 09127777777 | S07 – Invalid Data Types | `02_negative/S07_wrong_types.json` |
+| 09128888888 | S08 – HTTP 500 | `02_negative/S08_body_status.json` |
+| 09129999999 | S09 – Invalid Body Status | `02_negative/S09_http_500.json` |
+| 09120000009 | S10 – Missing Wallet Source ID | `02_negative/S10_missing_source_id.json` |
+| 09120000010 | S11 – Invalid Price Type | `02_negative/S11_invalid_price_type.json` |
+| 09120000011 | S12 – Clickable BNPL with Empty Options | `02_negative/S12_empty_options_clickable.json` |
 
-`pytest-html` hooks into the pytest run. `pytest.ini` points `--html` at `reports/report.html`, inlines CSS/JS with `--self-contained-html`, and applies Digipay styling from `reports/assets/report.css`. The header uses `MyDigiPay.png` and brand blue `#0000FF` sampled from that file. If you replace the PNG, run `python reports/assets/_build_css.py` then `pytest` so the logo is embedded again. `conftest.py` sets the title, environment metadata, summary blurb, and attaches the last HTTP call to every test row.
+## 6. Project Structure
 
-Open the file in a browser after a run. You do not need a server.
-
-### What you get
-
-| Feature | Where |
+| Directory / File | Responsibility |
 |---|---|
-| Digipay logo (`MyDigiPay.png`), brand blue `#0000FF`, IBM Plex | Header / footer (`report.css`) |
-| Environment (product, endpoint, approach, Python) | Top table |
-| Pass / fail / skip counts and filters | Summary |
-| Expandable rows | Results table |
-| Request URL, query, status, headers, body | Expanded row (`<pre>`) + **Captured log call** |
-| Rule id, method/option, actual value | Failure traceback on red rows |
+| `features/` | Gherkin feature files and business scenarios |
+| `steps/` | Given / When / Then step definitions |
+| `apis/` | HTTP communication through Playwright |
+| `validators/` | Schema, data type and business rule validations (R1–R7) |
+| `testdata/` | Positive and negative JSON fixtures |
+| `mock_server/` | Local HTTP mock server |
+| `reports/` | HTML and Allure test reports |
+| `.github/workflows/` | GitHub Actions CI configuration |
 
-This is a static snapshot of one run, not a live GUI like Cypress.
+## 7. HTML Test Report
 
-## Allure report
+Each pytest execution generates a self-contained HTML report:
 
-Allure is the richer report many QA teams use (suites, attachments, environment, filters). This suite writes Allure results on every `pytest` run.
+`reports/report.html`
+
+The report includes:
+
+- Execution summary and pass/fail/skip counts.
+- Environment and endpoint information.
+- Expandable test result rows.
+- HTTP request and response details.
+- Captured logs for each test.
+- Detailed failure tracebacks, including rule ID, method/option and actual values.
+
+### Report Customization
+
+`pytest-html` is configured through `pytest.ini` with `--self-contained-html`.
+
+Digipay styling is applied through:
+
+`reports/assets/report.css`
+
+The report uses the Digipay brand blue (`#0000FF`) and IBM Plex typography.
+
+If the logo is replaced, regenerate the embedded CSS:
 
 ```bash
-pip install -r requirements.txt
+python reports/assets/_build_css.py
 pytest
 ```
 
-Results: `reports/allure-results/`. To open the UI you need **Java 21+** and the Allure CLI:
+The generated HTML is a static snapshot of the test execution and can be opened directly in a browser without a web server.
+
+## 8. Allure Report
+
+The project also generates Allure results for richer test execution analysis.
+
+Results directory:
+
+`reports/allure-results/`
+
+### Open Interactive Report
+
+Requirements: Java 21+ and Allure CLI.
 
 ```bash
 npm install -g allure-commandline
 allure serve reports/allure-results
 ```
 
-Static HTML (same as CI):
+### Generate Static HTML
 
 ```bash
 allure generate reports/allure-results -o reports/allure-report --clean
 ```
 
-Then open `reports/allure-report/index.html`.
+Open:
 
-Each test gets:
+`reports/allure-report/index.html`
 
-- Epic `Digipay`, feature from the Gherkin file, story = scenario name
-- **Request / Response** text attachment
-- **Response JSON** attachment
-- Environment: product, endpoint, mock approach
+Each test includes:
 
-Keep `reports/report.html` for a single-file screenshot. Use Allure when you want the standard QA report UI.
+- Epic: `Digipay`
+- Feature: Gherkin feature file
+- Story: Scenario name
+- Request / Response attachment
+- Response JSON attachment
+- Environment metadata
 
-## CellNumber fixtures
+Use the standard HTML report for a lightweight execution summary and Allure for more detailed test analysis.
 
-| CellNumber  | Scenario | Fixture |
-|-------------|----------|---------|
-| 09121111111 | S01 happy path | `testdata/01_positive/S01_happy_path.json` |
-| 09122222222 | S02 BNPL blocked | `testdata/01_positive/S02_bnpl_blocked.json` |
-| 09123333333 | S03 credit = 0 | `testdata/01_positive/S03_insufficient_credit.json` |
-| 09124444444 | S04 `is_active = false` | `testdata/01_positive/S04_non_active_option.json` |
-| 09125555555 | S05 two eligible defaults | `testdata/02_negative/S05_invalid_default.json` |
-| 09126666666 | S06 missing `type` / `title` | `testdata/02_negative/S06_missing_required_field.json` |
-| 09127777777 | S07 wrong types | `testdata/02_negative/S07_wrong_types.json` |
-| 09128888888 | S08 HTTP 500 | `testdata/02_negative/S09_http_500.json` |
-| 09129999999 | S09 body `status != 200` | `testdata/02_negative/S08_body_status.json` |
-| 09120000009 | S10 wallet without `source_id` | `testdata/02_negative/S10_missing_source_id.json` |
-| 09120000010 | S11 invalid `price_type` | `testdata/02_negative/S11_invalid_price_type.json` |
-| 09120000011 | S12 clickable BNPL, empty options | `testdata/02_negative/S12_empty_options_clickable.json` |
+## 9. Assumptions & Validation Rules
 
-## Layout
+The following assumptions were used during test implementation:
 
-- `features/` — Gherkin only (no HTTP or JSON)
-- `steps/test_checkout.py` — Given / When / Then (pytest collects `test_*.py`)
-- `apis/` — Playwright client
-- `validators/` — schema, types, rules R1–R7
-- `testdata/01_positive/` and `testdata/02_negative/` — response fixtures (`S01`–`S12`)
-- `mock_server/` — fake `GET /payment/`
-- Failures name the rule, method/option, and actual value; every test logs request/response
+- `GET /payment/?CellNumber=` is sufficient to select the customer payload.
+- Supported `type` values are lowercase: `online`, `wallet`, `bnpl`.
+- `price_type` is case-sensitive: `CASH_PRICE` / `CREDIT_PRICE`.
+- Boolean values are rejected where integers are required (`True` is not a valid `id`).
+- R6 is evaluated only among eligible options and only when at least one eligible option exists.
+- Selectable means `is_clickable is True` (R2).
+- Eligible means `is_active is True` and `credit > 0` (R5).
 
-## Assumptions
+## 10. Continuous Integration (CI)
 
-- `GET /payment/?CellNumber=` is enough to select the customer payload.
-- `type` is lowercase `online` | `wallet` | `bnpl`.
-- `price_type` is case-sensitive (`CASH_PRICE` / `CREDIT_PRICE`).
-- `bool` is rejected where `int` is required (`True` is not a valid `id`).
-- R6 is evaluated only among eligible options, and only when at least one eligible option exists.
-- Selectable means `is_clickable is True` (R2). Eligible option means `is_active is True` and `credit > 0` (R5).
+GitHub Actions executes the regression suite automatically.
 
-## CI
+Workflow:
 
-`.github/workflows/ci.yml` runs pytest on `ubuntu-24.04` and uploads `reports/report.html` plus `reports/allure-report`. The runner is pinned because Playwright 1.55 does not ship Chromium for Ubuntu 26.04 (`ubuntu-latest`).
+`.github/workflows/ci.yml`
+
+Execution environment:
+
+- Ubuntu 24.04 (`ubuntu-24.04`)
+- Python and project dependencies
+- Playwright and Chromium
+- Pytest
+
+The workflow uploads the generated HTML report and Allure report as CI artifacts.
+
+The runner is pinned to Ubuntu 24.04 because Playwright 1.55 does not provide a Chromium build for Ubuntu 26.04 (`ubuntu-latest`).
+
+---
+<p align="center">
+  <strong>Digipay Checkout Payment API – Automated Regression Suite</strong>
+  <br>
+  <sub>Python · Pytest · Playwright · pytest-bdd · Allure · GitHub Actions</sub>
+</p>
+
