@@ -1,9 +1,0 @@
-GET http://127.0.0.1:8080/payment/?CellNumber=09128888888
-Query: {'CellNumber': '09128888888'}
-HTTP 500
-Headers: {'server': 'BaseHTTP/0.6 Python/3.13.5', 'date': 'Mon, 16 Nov 2026 21:16:00 GMT', 'content-type': 'application/json', 'content-length': '44'}
-Body:
-{
-  "status": 500,
-  "error": "upstream timeout"
-}
