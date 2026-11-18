@@ -1,0 +1,471 @@
+{
+  "uuid": "3922b5bc-aa10-44cf-90d8-b1feeb17cbbd",
+  "lastMigration": 33,
+  "name": "Digipay Checkout Payment",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 8080,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "17d141b2-65ba-4adc-9bc5-aa72ae32b6c7",
+      "type": "http",
+      "documentation": "Checkout payment methods",
+      "method": "get",
+      "endpoint": "payment/",
+      "responses": [
+        {
+          "uuid": "74548e69-f71f-409a-9b69-0bcd7b34fc6c",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true,\n      \"source_id\": 316\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": false,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S01 happy path with online, wallet and bnpl clickable - CellNumber: 09121111111",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09121111111",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "3fe91ae5-bbbf-42f7-934f-6df900721d6f",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true,\n      \"source_id\": 316\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": false,\n      \"source_id\": 367,\n      \"options\": []\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S02 BNPL is blocked and not selectable - CellNumber: 09122222222",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09122222222",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "ced4ff0a-0561-4ce8-a3db-b3db4c00bdbf",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 0,\n          \"is_active\": true,\n          \"is_default\": false,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S03 option with zero credit is ineligible - CellNumber: 09123333333",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09123333333",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "d6c226b5-6a44-4e0c-9c7a-2846cf743fd5",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": false,\n          \"is_default\": false,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S04 non-active option is ineligible - CellNumber: 09124444444",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09124444444",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "585e0490-577e-4e88-aa14-d7a623649470",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S05 several eligible defaults violate R6 - CellNumber: 09125555555",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09125555555",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "ff7d657f-b034-48bd-b9f3-d465d4b04527",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"is_clickable\": true\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S06 missing required method field violates R1 - CellNumber: 09126666666",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09126666666",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "d46fc082-2a8b-4b32-9bf5-7484a9616b43",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": \"1\",\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": \"true\"\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S07 wrong field types fail type validation - CellNumber: 09127777777",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09127777777",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "96030b1e-0e28-4a50-9761-b6d539130aa3",
+          "body": "{\n  \"status\": 500,\n  \"error\": \"upstream timeout\"\n}\n",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "S08 HTTP 500 fails fast - CellNumber: 09128888888",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09128888888",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "38276c84-4873-4136-b7fa-8209511f7617",
+          "body": "{\n  \"status\": 500,\n  \"payment_methods\": []\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S09 non-success body status fails fast - CellNumber: 09129999999",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09129999999",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "8b5ae5ce-4c4d-4212-b7fc-5a9bd4d42e56",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S10 wallet without source_id violates R3 - CellNumber: 09120000009",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09120000009",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a0da55c0-97f2-4f4b-ae75-b04225262f5f",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"cash_price\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S11 invalid price_type violates R7 - CellNumber: 09120000010",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09120000010",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "00a9efa0-c7b9-49eb-832d-64ce33077edd",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": []\n    }\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "S12 clickable BNPL with empty options violates R4 - CellNumber: 09120000011",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "CellNumber",
+              "value": "09120000011",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "58b88f58-c7e2-4ff9-a955-43e22d88b5b2",
+          "body": "{\"status\": 404, \"error\": \"unknown CellNumber\"}",
+          "latency": 0,
+          "statusCode": 404,
+          "label": "Unknown CellNumber",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": true,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "17d141b2-65ba-4adc-9bc5-aa72ae32b6c7"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json; charset=utf-8"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

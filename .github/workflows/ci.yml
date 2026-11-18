@@ -26,6 +26,15 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+      - name: Start Mockoon
+        uses: mockoon/cli-action@v2
+        with:
+          version: "9.6.1"
+          data-file: mockoon/checkout-payment.json
+          port: 8080
+          hostname: 127.0.0.1
+      - name: Wait for Mockoon
+        run: curl -sf "http://127.0.0.1:8080/payment/?CellNumber=09121111111"
       - name: Run API suite
         run: pytest
       - name: Generate Allure report

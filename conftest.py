@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import urllib.error
+import urllib.request
 from html import escape
 from pathlib import Path
 
@@ -13,10 +15,9 @@ from playwright.sync_api import sync_playwright
 from pytest_metadata.plugin import metadata_key
 
 from apis.payment_api import PaymentApi
-from mock_server.server import MockServer
 from validators.payment_validator import PaymentValidator
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 LOGGER = logging.getLogger("checkout-api")
 
@@ -27,16 +28,24 @@ def base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def mock_port(base_url) -> int:
+def mock_port() -> int:
     return int(os.getenv("MOCK_PORT", "8080"))
 
 
 @pytest.fixture(scope="session", autouse=True)
-def mock_server(mock_port):
-    server = MockServer(port=mock_port)
-    server.start()
-    yield server
-    server.stop()
+def require_mockoon(mock_port):
+    url = f"http://127.0.0.1:{mock_port}/payment/?CellNumber=09121111111"
+    try:
+        urllib.request.urlopen(url, timeout=3)
+    except urllib.error.URLError as error:
+        pytest.exit(
+            f"Mockoon is not running at {url}. "
+            "Desktop: File → Open environment → mockoon/checkout-payment.json, then Start. "
+            "CLI: npx @mockoon/cli start --data mockoon/checkout-payment.json --port 8080. "
+            f"Details: {error}",
+            returncode=1,
+        )
+    yield
 
 
 @pytest.fixture(scope="session")
@@ -100,7 +109,7 @@ def pytest_sessionfinish(session, exitstatus):
                 "Product=Digipay Checkout",
                 "Suite=Checkout Payment API",
                 "Endpoint=GET /payment/",
-                "Approach=A local mock server + JSON fixtures",
+                "Approach=A Mockoon + JSON fixtures",
                 "Client=Playwright APIRequestContext",
             ]
         )
@@ -113,7 +122,8 @@ def pytest_configure(config):
     config.stash[metadata_key]["Product"] = "Digipay Checkout"
     config.stash[metadata_key]["Suite"] = "Checkout Payment API"
     config.stash[metadata_key]["Endpoint"] = "GET /payment/"
-    config.stash[metadata_key]["Approach"] = "A — local mock server + JSON fixtures"
+    config.stash[metadata_key]["Approach"] = "A — Mockoon + JSON fixtures"
+    config.stash[metadata_key]["Mock"] = "Mockoon"
     config.stash[metadata_key]["Client"] = "Playwright APIRequestContext"
 
 

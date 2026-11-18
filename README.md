@@ -18,14 +18,11 @@ The suite covers both successful and invalid responses through isolated test dat
 
 ## 2. Test Approach
 
-**Approach A — Local Mock Server**
+**Approach A — Mockoon**
 
-The project uses a local HTTP mock server backed by JSON fixtures in `testdata/`.
+Tests call a real HTTP endpoint with Playwright `APIRequestContext`. Each `CellNumber` is a query rule in `mockoon/checkout-payment.json`. No live Digipay environment.
 
-- Tests communicate with a real HTTP endpoint using Playwright `APIRequestContext`.
-- The mock server maps each `CellNumber` to its corresponding JSON fixture.
-- Each test scenario receives a controlled and predictable response.
-- No connection to the actual Digipay environment is required.
+Local: Mockoon Desktop. CI: `@mockoon/cli` starts `mockoon/checkout-payment.json` before pytest.
 
 ## 3. Test Analysis & Design
 
@@ -83,11 +80,8 @@ This separation improves maintainability and makes it easier to extend the suite
 
 ### Requirements
 
-- Python
-- Playwright
-- Pytest
-- pytest-bdd
-- Other dependencies listed in `requirements.txt`
+- Python (see `requirements.txt`)
+- Mockoon Desktop **or** `@mockoon/cli` (must be running on port 8080 before pytest)
 
 ### Setup
 
@@ -110,42 +104,65 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-### Run Tests
+### Run tests
+
+Mockoon must be up on port **8080** before pytest. Two ways:
+
+1. **Mockoon Desktop (Windows GUI)**
+2. **CLI** (no Desktop install)
+
+**1. Desktop**
+
+File → Open environment from file → `mockoon/checkout-payment.json` → Start on port **8080**. Then in the project terminal:
 
 ```bash
 pytest
 ```
 
-The mock server starts automatically for the pytest session using `BASE_URL`.
+After you change routes, save/export so `mockoon/checkout-payment.json` is what CI starts.
 
-Default endpoint:
+**2. CLI (no GUI)**
 
-`http://127.0.0.1:8080`
+Needs [Node.js](https://nodejs.org/) (`npx`). Split the terminal:
 
-### Standalone Mock Server (Optional)
+Tab 1 — leave this running:
 
 ```bash
-python -m mock_server.server --port 8080
+npx @mockoon/cli start --data mockoon/checkout-payment.json --port 8080
 ```
 
-## 5. Test Data & Scenarios
+Optional: add `--log-transaction` at the end to print full request/response JSON in that tab:
 
-Each test scenario uses a dedicated JSON fixture mapped to a unique `CellNumber`.
+```bash
+npx @mockoon/cli start --data mockoon/checkout-payment.json --port 8080 --log-transaction
+```
 
-| CellNumber | Scenario | Fixture |
-|---|---|---|
-| 09121111111 | S01 – Happy Path | `01_positive/S01_happy_path.json` |
-| 09122222222 | S02 – BNPL Blocked | `01_positive/S02_bnpl_blocked.json` |
-| 09123333333 | S03 – Zero Credit | `01_positive/S03_insufficient_credit.json` |
-| 09124444444 | S04 – Inactive Option | `01_positive/S04_non_active_option.json` |
-| 09125555555 | S05 – Multiple Default Methods | `02_negative/S05_invalid_default.json` |
-| 09126666666 | S06 – Missing Required Fields | `02_negative/S06_missing_required_field.json` |
-| 09127777777 | S07 – Invalid Data Types | `02_negative/S07_wrong_types.json` |
-| 09128888888 | S08 – HTTP 500 | `02_negative/S08_body_status.json` |
-| 09129999999 | S09 – Invalid Body Status | `02_negative/S09_http_500.json` |
-| 09120000009 | S10 – Missing Wallet Source ID | `02_negative/S10_missing_source_id.json` |
-| 09120000010 | S11 – Invalid Price Type | `02_negative/S11_invalid_price_type.json` |
-| 09120000011 | S12 – Clickable BNPL with Empty Options | `02_negative/S12_empty_options_clickable.json` |
+Tab 2:
+
+```bash
+pytest
+```
+
+Optional check: `http://127.0.0.1:8080/payment/?CellNumber=09121111111`
+
+## 5. Scenarios (`CellNumber`)
+
+Payloads live in Mockoon. The suite only sends `GET /payment/?CellNumber=…`.
+
+| CellNumber | Scenario |
+|---|---|
+| 09121111111 | S01 Happy path |
+| 09122222222 | S02 BNPL blocked |
+| 09123333333 | S03 Zero credit |
+| 09124444444 | S04 Inactive option |
+| 09125555555 | S05 Multiple defaults |
+| 09126666666 | S06 Missing required fields |
+| 09127777777 | S07 Invalid types |
+| 09128888888 | S08 HTTP 500 |
+| 09129999999 | S09 Body status ≠ 200 |
+| 09120000009 | S10 Missing wallet `source_id` |
+| 09120000010 | S11 Invalid `price_type` |
+| 09120000011 | S12 Clickable BNPL, empty options |
 
 ## 6. Project Structure
 
@@ -155,8 +172,7 @@ Each test scenario uses a dedicated JSON fixture mapped to a unique `CellNumber`
 | `steps/` | Given / When / Then step definitions |
 | `apis/` | HTTP communication through Playwright |
 | `validators/` | Schema, data type and business rule validations (R1–R7) |
-| `testdata/` | Positive and negative JSON fixtures |
-| `mock_server/` | Local HTTP mock server |
+| `mockoon/checkout-payment.json` | Mockoon environment (edit in Desktop; CI starts this file) |
 | `reports/` | HTML and Allure test reports |
 | `.github/workflows/` | GitHub Actions CI configuration |
 
@@ -255,9 +271,8 @@ Workflow:
 Execution environment:
 
 - Ubuntu 24.04 (`ubuntu-24.04`)
-- Python and project dependencies
-- Playwright and Chromium
-- Pytest
+- `@mockoon/cli` serves `mockoon/checkout-payment.json` on port 8080
+- Python, Playwright, pytest
 
 The workflow uploads the generated HTML report and Allure report as CI artifacts.
 
@@ -267,6 +282,6 @@ The runner is pinned to Ubuntu 24.04 because Playwright 1.55 does not provide a 
 <p align="center">
   <strong>Digipay Checkout Payment API – Automated Regression Suite</strong>
   <br>
-  <sub>Python · Pytest · Playwright · pytest-bdd · Allure · GitHub Actions</sub>
+  <sub>Python · Pytest · Playwright · pytest-bdd · Mockoon · Allure · GitHub Actions</sub>
 </p>
 
