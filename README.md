@@ -5,7 +5,6 @@
   <br>
   Automated validation of <code>GET /payment/</code> using Python, Pytest and Playwright.
 </p>
-
 ---
 
 ## 1. Project Overview
@@ -25,6 +24,8 @@ Tests call a real HTTP endpoint with Playwright `APIRequestContext`. Each `CellN
 Local: Mockoon Desktop. CI: `@mockoon/cli` starts `mockoon/checkout-payment.json` before pytest.
 
 ## 3. Test Analysis & Design
+
+
 
 ### 3.1 Requirement Analysis
 
@@ -46,12 +47,16 @@ These rules are implemented independently in the `validators/` package to separa
 
 The test scenarios were designed using the following testing approaches:
 
-| Test Type | Coverage |
-|---|---|
-| Positive Testing | Valid payment methods and eligible payment options |
-| Negative Testing | Missing fields, invalid types and business rule violations |
-| Boundary & Edge Case Testing | Zero credit, empty options and multiple default methods |
-| API Error Handling | HTTP 500 and inconsistent response body status |
+
+| Test Type                    | Coverage                                                   |
+| ---------------------------- | ---------------------------------------------------------- |
+| Positive Testing             | Valid payment methods and eligible payment options         |
+| Negative Testing             | Missing fields, invalid types and business rule violations |
+| Boundary & Edge Case Testing | Zero credit, empty options and multiple default methods    |
+| API Error Handling           | HTTP 500 and inconsistent response body status             |
+
+
+
 
 ### 3.3 Scenario Execution Flow
 
@@ -69,6 +74,7 @@ Each fixture represents an isolated test condition, allowing scenarios to run in
 The suite uses Gherkin feature files with `pytest-bdd` step definitions.
 
 This approach separates:
+
 - Business-readable test scenarios.
 - API request execution.
 - Response and business rule validation.
@@ -78,10 +84,14 @@ This separation improves maintainability and makes it easier to extend the suite
 
 ## 4. Installation & Execution
 
+
+
 ### Requirements
 
 - Python (see `requirements.txt`)
 - Mockoon Desktop **or** `@mockoon/cli` (must be running on port 8080 before pytest)
+
+
 
 ### Setup
 
@@ -104,16 +114,22 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-### Run tests
 
+
+### Mock Server
+
+Mockoon is used to simulate the Payment API, keeping mock service configuration separate from the test automation code.
 Mockoon must be up on port **8080** before pytest. Two ways:
 
 1. **Mockoon Desktop (Windows GUI)**
 2. **CLI** (no Desktop install)
 
-**1. Desktop**
+**1. Desktop (download from [https://mockoon.com/download/](https://mockoon.com/download/))**
 
-File → Open environment from file → `mockoon/checkout-payment.json` → Start on port **8080**. Then in the project terminal:
+1. Open Mockoon Desktop.
+2. Go to File → Open local environment.
+3. Select mockoon/checkout-payment.json.
+4. Click Start local server ▶.
 
 ```bash
 pytest
@@ -149,32 +165,40 @@ Optional check: `http://127.0.0.1:8080/payment/?CellNumber=09121111111`
 
 Payloads live in Mockoon. The suite only sends `GET /payment/?CellNumber=…`.
 
-| CellNumber | Scenario |
-|---|---|
-| 09121111111 | S01 Happy path |
-| 09122222222 | S02 BNPL blocked |
-| 09123333333 | S03 Zero credit |
-| 09124444444 | S04 Inactive option |
-| 09125555555 | S05 Multiple defaults |
-| 09126666666 | S06 Missing required fields |
-| 09127777777 | S07 Invalid types |
-| 09128888888 | S08 HTTP 500 |
-| 09129999999 | S09 Body status ≠ 200 |
-| 09120000009 | S10 Missing wallet `source_id` |
-| 09120000010 | S11 Invalid `price_type` |
+
+| CellNumber  | Scenario                          |
+| ----------- | --------------------------------- |
+| 09121111111 | S01 Happy path                    |
+| 09122222222 | S02 BNPL blocked                  |
+| 09123333333 | S03 Zero credit                   |
+| 09124444444 | S04 Inactive option               |
+| 09125555555 | S05 Multiple defaults             |
+| 09126666666 | S06 Missing required fields       |
+| 09127777777 | S07 Invalid types                 |
+| 09128888888 | S08 HTTP 500                      |
+| 09129999999 | S09 Body status ≠ 200             |
+| 09120000009 | S10 Missing wallet `source_id`    |
+| 09120000010 | S11 Invalid `price_type`          |
 | 09120000011 | S12 Clickable BNPL, empty options |
+
+
+
 
 ## 6. Project Structure
 
-| Directory / File | Responsibility |
-|---|---|
-| `features/` | Gherkin feature files and business scenarios |
-| `steps/` | Given / When / Then step definitions |
-| `apis/` | HTTP communication through Playwright |
-| `validators/` | Schema, data type and business rule validations (R1–R7) |
+
+| Directory / File                | Responsibility                                             |
+| ------------------------------- | ---------------------------------------------------------- |
+| `features/`                     | Gherkin feature files and business scenarios               |
+| `steps/`                        | Given / When / Then step definitions                       |
+| `apis/`                         | HTTP communication through Playwright                      |
+| `validators/`                   | Schema, data type and business rule validations (R1–R7)    |
 | `mockoon/checkout-payment.json` | Mockoon environment (edit in Desktop; CI starts this file) |
-| `reports/` | HTML and Allure test reports |
-| `.github/workflows/` | GitHub Actions CI configuration |
+| `reports/`                      | HTML and Allure test reports                               |
+| `.github/workflows/`            | GitHub Actions CI configuration                            |
+
+
+
 
 ## 7. HTML Test Report
 
@@ -190,6 +214,8 @@ The report includes:
 - HTTP request and response details.
 - Captured logs for each test.
 - Detailed failure tracebacks, including rule ID, method/option and actual values.
+
+
 
 ### Report Customization
 
@@ -227,6 +253,8 @@ npm install -g allure-commandline
 allure serve reports/allure-results
 ```
 
+
+
 ### Generate Static HTML
 
 ```bash
@@ -260,6 +288,8 @@ The following assumptions were used during test implementation:
 - Selectable means `is_clickable is True` (R2).
 - Eligible means `is_active is True` and `credit > 0` (R5).
 
+
+
 ## 10. Continuous Integration (CI)
 
 GitHub Actions executes the regression suite automatically.
@@ -279,9 +309,6 @@ The workflow uploads the generated HTML report and Allure report as CI artifacts
 The runner is pinned to Ubuntu 24.04 because Playwright 1.55 does not provide a Chromium build for Ubuntu 26.04 (`ubuntu-latest`).
 
 ---
-<p align="center">
-  <strong>Digipay Checkout Payment API – Automated Regression Suite</strong>
-  <br>
-  <sub>Python · Pytest · Playwright · pytest-bdd · Mockoon · Allure · GitHub Actions</sub>
-</p>
 
+**Digipay Checkout Payment API – Automated Regression Suite**  
+Python · Pytest · Playwright · pytest-bdd · Mockoon · Allure · GitHub Actions

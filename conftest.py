@@ -24,17 +24,12 @@ LOGGER = logging.getLogger("checkout-api")
 
 @pytest.fixture(scope="session")
 def base_url() -> str:
-    return os.getenv("BASE_URL", "http://127.0.0.1:8080")
-
-
-@pytest.fixture(scope="session")
-def mock_port() -> int:
-    return int(os.getenv("MOCK_PORT", "8080"))
+    return os.getenv("BASE_URL", "http://127.0.0.1:8080").rstrip("/")
 
 
 @pytest.fixture(scope="session", autouse=True)
-def require_mockoon(mock_port):
-    url = f"http://127.0.0.1:{mock_port}/payment/?CellNumber=09121111111"
+def require_mockoon(base_url):
+    url = f"{base_url}/payment/?CellNumber=09121111111"
     try:
         urllib.request.urlopen(url, timeout=3)
     except urllib.error.URLError as error:

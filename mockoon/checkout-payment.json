@@ -401,7 +401,7 @@
         },
         {
           "uuid": "58b88f58-c7e2-4ff9-a955-43e22d88b5b2",
-          "body": "{\"status\": 404, \"error\": \"unknown CellNumber\"}",
+          "body": "{\n  \"status\": 404,\n  \"error\": \"unknown CellNumber\"\n}",
           "latency": 0,
           "statusCode": 404,
           "label": "Unknown CellNumber",
