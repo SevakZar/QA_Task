@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import logging
 import os
 import urllib.error
 import urllib.request
@@ -18,8 +16,6 @@ from apis.payment_api import PaymentApi
 from validators.payment_validator import PaymentValidator
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
-
-LOGGER = logging.getLogger("checkout-api")
 
 
 @pytest.fixture(scope="session")
@@ -57,39 +53,51 @@ def request_context(playwright_instance, base_url):
 
 
 @pytest.fixture
-def payment_api(request_context, base_url) -> PaymentApi:
-    return PaymentApi(request_context, base_url)
+def payment_api(request, request_context, base_url) -> PaymentApi:
+    api = PaymentApi(request_context, base_url)
+    request.node.payment_api_client = api
+    return api
 
 
 @pytest.fixture
-def validator() -> PaymentValidator:
-    return PaymentValidator()
+def validator(request) -> PaymentValidator:
+    instance = PaymentValidator(node=request.node)
+    request.node.payment_validator = instance
+    return instance
 
 
-@pytest.fixture(autouse=True)
-def allure_http_attachment(payment_api):
-    yield
-    call = payment_api.last_call
-    if call is None:
-        return
-    allure.attach(
-        call.as_log(),
-        name="Request / Response",
-        attachment_type=allure.attachment_type.TEXT,
-    )
-    if isinstance(call.body, dict):
-        allure.attach(
-            json.dumps(call.body, indent=2, ensure_ascii=False),
-            name="Response JSON",
-            attachment_type=allure.attachment_type.JSON,
-        )
+def _ensure_progress(node) -> list:
+    progress = getattr(node, "progress_log", None)
+    if progress is None:
+        progress = []
+        node.progress_log = progress
+    return progress
 
 
 def pytest_bdd_before_scenario(request, feature, scenario):
+    _ensure_progress(request.node).clear()
+    request.node.current_step = None
     allure.dynamic.epic("Digipay")
     allure.dynamic.feature(feature.name)
     allure.dynamic.story(scenario.name)
     allure.dynamic.suite("Checkout Payment API")
+
+
+def pytest_bdd_before_step(request, feature, scenario, step, step_func):
+    current = {
+        "keyword": step.keyword.strip(),
+        "name": step.name,
+        "passed": False,
+        "rules": [],
+    }
+    request.node.current_step = current
+    _ensure_progress(request.node).append(current)
+
+
+def pytest_bdd_after_step(request, feature, scenario, step, step_func, step_func_args):
+    current = getattr(request.node, "current_step", None)
+    if isinstance(current, dict):
+        current["passed"] = True
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -146,32 +154,73 @@ def pytest_html_results_summary(prefix, summary, postfix, session):
     postfix.extend(
         [
             "<p class='digipay-footer-note'>"
-            "Expand a row for Captured log call (request/response). "
-            "Failed tests also include the rule id, method/option, and actual value."
+            "Passed tests log each rule that passed. "
+            "Failed tests include the HTTP request/response."
             "</p>"
         ]
     )
 
 
-@pytest.hookimpl(hookwrapper=True)
+def _format_progress(item, error: str = "") -> str:
+    progress = getattr(item, "progress_log", None) or []
+    if progress and isinstance(progress[0], dict):
+        blocks = []
+        for step in progress:
+            status = "passed" if step.get("passed") else "failed"
+            blocks.append(
+                f"<span class='log-step'>{escape(step['keyword'])} {escape(step['name'])} {status}</span>"
+            )
+            for rule in step.get("rules", []):
+                blocks.append(f"<span class='log-rule'>    {escape(rule)}</span>")
+        if error:
+            blocks.append(f"<span class='log-fail'>    failed {escape(error)}</span>")
+        return "<pre class='http-dump'>" + "\n".join(blocks) + "</pre>"
+
+    validator = getattr(item, "payment_validator", None)
+    lines = list(validator.rule_log) if validator and validator.rule_log else []
+    if error:
+        lines.append(f"failed {error}")
+    return "<pre class='http-dump'>" + escape("\n".join(lines)) + "</pre>"
+
+
+def _http_log(item) -> str:
+    api = getattr(item, "payment_api_client", None)
+    if api is None or api.last_call is None:
+        return ""
+    return api.last_call.as_log()
+
+
+def _html_extra(item, report, markup: str) -> None:
+    pytest_html = item.config.pluginmanager.getplugin("html")
+    if pytest_html is None or not markup:
+        return
+    extras = getattr(report, "extras", [])
+    extras.append(pytest_html.extras.html(markup))
+    report.extras = extras
+
+
+def _exception_line(call) -> str:
+    if call.excinfo is None:
+        return ""
+    exc_type = call.excinfo.type
+    return f"{exc_type.__module__}.{exc_type.__qualname__}: {call.excinfo.value}"
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
-    if report.when != "call":
+    setattr(item, f"rep_{report.when}", report)
+    if report.when not in ("setup", "call"):
         return
-    api = item.funcargs.get("payment_api")
-    if api is None or api.last_call is None:
+
+    if report.passed and report.when == "call":
+        _html_extra(item, report, _format_progress(item))
         return
-    http_log = api.last_call.as_log()
-    pytest_html = item.config.pluginmanager.getplugin("html")
-    extras = getattr(report, "extras", [])
-    if pytest_html is not None:
-        extras.append(
-            pytest_html.extras.html(
-                f"<pre class='http-dump'>{escape(http_log)}</pre>"
-            )
-        )
-        report.extras = extras
+
     if report.failed:
-        LOGGER.error("Failed test diagnostics\n%s", http_log)
-        report.longrepr = f"{report.longrepr}\n\nRequest / response:\n{http_log}"
+        error = _exception_line(call)
+        _html_extra(item, report, _format_progress(item, error))
+        http_log = _http_log(item)
+        if http_log:
+            report.longrepr = f"{report.longrepr}\n\nRequest / response:\n{http_log}"

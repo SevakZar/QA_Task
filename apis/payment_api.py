@@ -42,7 +42,6 @@ class PaymentApi:
     def get_payment_methods(self, cell_number: str) -> tuple[int, dict | str]:
         url = f"{self._base_url}/payment/"
         params = {"CellNumber": cell_number}
-        LOGGER.info("REQUEST GET %s params=%s", url, params)
         response: APIResponse = self._request.get(url, params=params)
         body = self._parse_body(response)
         self.last_call = PaymentCall(
@@ -53,7 +52,7 @@ class PaymentApi:
             body=body,
             headers=dict(response.headers),
         )
-        LOGGER.info("RESPONSE HTTP %s\n%s", response.status, self.last_call.as_log())
+        LOGGER.debug("GET %s params=%s HTTP %s", url, params, response.status)
         return response.status, body
 
     @staticmethod

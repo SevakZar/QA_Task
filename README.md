@@ -65,7 +65,7 @@ Each scenario follows a consistent Given / When / Then structure:
 1. **Given:** Select a customer using a predefined `CellNumber` fixture.
 2. **When:** Send an HTTP GET request to `/payment/` using Playwright.
 3. **Then:** Validate HTTP status, response structure, data types and business rules.
-4. **Report:** Capture request/response details and provide rule-specific failure messages.
+4. **Report:** Log each passed rule; on failure attach HTTP request/response with the rule id.
 
 Each fixture represents an isolated test condition, allowing scenarios to run independently and consistently.
 
@@ -211,9 +211,8 @@ The report includes:
 - Execution summary and pass/fail/skip counts.
 - Environment and endpoint information.
 - Expandable test result rows.
-- HTTP request and response details.
-- Captured logs for each test.
-- Detailed failure tracebacks, including rule ID, method/option and actual values.
+- Passed tests: one log line per rule that passed.
+- Failed tests: full HTTP request and response, plus rule id / method / option / actual.
 
 
 

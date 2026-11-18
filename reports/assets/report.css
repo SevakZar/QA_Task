@@ -210,6 +210,20 @@ html body > footer::after {
   font-size: 12px;
 }
 
+.http-dump .log-step {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.http-dump .log-rule {
+  color: #b8b8ff;
+}
+
+.http-dump .log-fail {
+  color: #ff4d6d;
+  font-weight: 600;
+}
+
 th:last-child:is(:has(+ *)),
 .col-links {
   display: none;

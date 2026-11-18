@@ -28,7 +28,7 @@ def all_rules_pass(payment_api, validator):
 
 
 @then(parsers.parse('methods "{types}" should be selectable'))
-def methods_are_selectable(types, payment_api):
+def methods_are_selectable(types, payment_api, validator):
     expected = {item.strip() for item in types.split(",") if item.strip()}
     actual = {method["type"] for method in payment_api.validation.selectable_methods}
     missing = expected - actual
@@ -36,20 +36,23 @@ def methods_are_selectable(types, payment_api):
         raise AssertionError(
             f"R2: expected selectable types {sorted(expected)}, actual {sorted(actual)}"
         )
+    validator.log_passed("R2", f"selectable types {sorted(actual)}")
 
 
 @then(parsers.parse('method "{method_type}" should not be selectable'))
-def method_not_selectable(method_type, payment_api):
+def method_not_selectable(method_type, payment_api, validator):
     actual = {method["type"] for method in payment_api.validation.selectable_methods}
     if method_type in actual:
         raise AssertionError(f"R2: method {method_type} must not be selectable | actual={actual}")
+    validator.log_passed("R2", f"{method_type} is not selectable")
 
 
 @then("bnpl options may be empty")
-def bnpl_options_may_be_empty(payment_api):
+def bnpl_options_may_be_empty(payment_api, validator):
     bnpl = next(method for method in payment_api.body["payment_methods"] if method["type"] == "bnpl")
     if bnpl["is_clickable"] is False and not isinstance(bnpl.get("options"), list):
         raise AssertionError("R4: blocked bnpl must still expose an options array")
+    validator.log_passed("R4", "blocked bnpl may have empty options")
 
 
 @then(parsers.parse("the bnpl option with source_id {source_id:d} should be ineligible"))
@@ -63,6 +66,7 @@ def option_is_ineligible(source_id, payment_api, validator):
     eligible = payment_api.validation.eligible_options_by_method.get(bnpl["id"], [])
     if any(item["source_id"] == source_id for item in eligible):
         raise AssertionError(f"R5: option.source_id={source_id} was marked eligible")
+    validator.log_passed("R5", f"option.source_id={source_id} is ineligible")
 
 
 @then(parsers.parse('validation should fail with rule "{rule}"'))
@@ -73,6 +77,7 @@ def validation_fails_with_rule(rule, payment_api, validator):
         if error.rule != rule:
             raise AssertionError(f"expected rule {rule}, got {error.rule}: {error}") from error
         payment_api.rule_error = error
+        validator.log_expected_fail(error.rule, str(error))
         return
     raise AssertionError(f"expected {rule} to fail, but validation passed")
 
@@ -85,5 +90,6 @@ def fail_fast(rule, payment_api, validator):
         if error.rule != rule:
             raise AssertionError(f"expected rule {rule}, got {error.rule}: {error}") from error
         payment_api.rule_error = error
+        validator.log_expected_fail(error.rule, str(error))
         return
     raise AssertionError(f"expected fast failure {rule}, but the response was accepted")

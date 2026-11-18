@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 from validators.errors import RuleViolation
+
+LOGGER = logging.getLogger("checkout-api")
 
 ALLOWED_TYPES = {"online", "wallet", "bnpl"}
 ALLOWED_PRICE_TYPES = {"CASH_PRICE", "CREDIT_PRICE"}
@@ -17,6 +20,28 @@ class ValidationResult:
 
 
 class PaymentValidator:
+    def __init__(self, node=None) -> None:
+        self.rule_log: list[str] = []
+        self._node = node
+
+    def _record(self, line: str) -> None:
+        self.rule_log.append(line)
+        current = getattr(self._node, "current_step", None) if self._node is not None else None
+        if isinstance(current, dict):
+            current.setdefault("rules", []).append(line)
+        LOGGER.info(line)
+
+    def log_passed(self, rule: str, message: str) -> None:
+        line = f"{rule} passed: {message}"
+        current = getattr(self._node, "current_step", None) if self._node is not None else None
+        rules = current.get("rules") if isinstance(current, dict) else None
+        if rules is not None and line in rules:
+            return
+        self._record(line)
+
+    def log_expected_fail(self, rule: str, message: str) -> None:
+        self._record(f"{rule} failed as expected: {message}")
+
     def require_success(self, http_status: int, body) -> None:
         if http_status != 200:
             raise RuleViolation(
@@ -33,6 +58,8 @@ class PaymentValidator:
                 "body.status must be 200",
                 actual=status,
             )
+        self.log_passed("HTTP", "status 200")
+        self.log_passed("BODY.status", "status 200")
 
     def validate(self, body: dict) -> ValidationResult:
         methods = body.get("payment_methods")
@@ -46,6 +73,7 @@ class PaymentValidator:
         result = ValidationResult()
         for index, method in enumerate(methods):
             self._validate_method(method, index, result)
+        self.log_passed("R1", "required method fields and types")
         return result
 
     def _validate_method(self, method, index: int, result: ValidationResult) -> None:
@@ -90,6 +118,7 @@ class PaymentValidator:
                     method=method,
                 )
             self._assert_type(method, "source_id", int, "R3")
+            self.log_passed("R3", "source_id present and int for wallet/bnpl")
 
         if method_type == "bnpl":
             self._validate_bnpl_options(method, result)
@@ -112,6 +141,7 @@ class PaymentValidator:
                 method=method,
                 actual=[],
             )
+        self.log_passed("R4", "bnpl options present and valid")
 
         eligible: list[dict] = []
         for option in options:
@@ -145,10 +175,17 @@ class PaymentValidator:
                     option=option,
                     actual=option["price_type"],
                 )
+            self.log_passed("R7", "price_type is CASH_PRICE or CREDIT_PRICE")
 
             if self.is_eligible(option):
                 eligible.append(option)
+            else:
+                self.log_passed(
+                    "R5",
+                    f"option.source_id={option.get('source_id')} is ineligible",
+                )
 
+        self.log_passed("R5", "inactive or zero-credit options are not eligible")
         result.eligible_options_by_method[method["id"]] = eligible
         if eligible:
             defaults = [opt for opt in eligible if opt["is_default"] is True]
@@ -159,6 +196,7 @@ class PaymentValidator:
                     method=method,
                     actual=len(defaults),
                 )
+            self.log_passed("R6", "exactly one eligible option is default")
 
     @staticmethod
     def is_eligible(option: dict) -> bool:
