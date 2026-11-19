@@ -21,23 +21,18 @@ class ValidationResult:
 
 class PaymentValidator:
     def __init__(self, node=None) -> None:
-        self.rule_log: list[str] = []
         self._node = node
 
     def _record(self, line: str) -> None:
-        self.rule_log.append(line)
         current = getattr(self._node, "current_step", None) if self._node is not None else None
         if isinstance(current, dict):
-            current.setdefault("rules", []).append(line)
+            rules = current.setdefault("rules", [])
+            if line not in rules:
+                rules.append(line)
         LOGGER.info(line)
 
     def log_passed(self, rule: str, message: str) -> None:
-        line = f"{rule} passed: {message}"
-        current = getattr(self._node, "current_step", None) if self._node is not None else None
-        rules = current.get("rules") if isinstance(current, dict) else None
-        if rules is not None and line in rules:
-            return
-        self._record(line)
+        self._record(f"{rule} passed: {message}")
 
     def log_expected_fail(self, rule: str, message: str) -> None:
         self._record(f"{rule} failed as expected: {message}")

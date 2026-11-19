@@ -21,6 +21,7 @@ css = """@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wgh
 
 html {
   background: var(--dp-blue);
+  overflow-x: hidden;
 }
 
 body {
@@ -29,12 +30,16 @@ body {
   color: var(--dp-ink);
   background: var(--dp-paper);
   margin: 0;
-  min-width: 800px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 h1#title {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   margin: 0;
   padding: 24px 40px 8px;
@@ -43,6 +48,8 @@ h1#title {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.01em;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 h1#title::before {
@@ -103,6 +110,8 @@ a {
 #results-table {
   margin-left: 40px;
   margin-right: 40px;
+  max-width: calc(100% - 80px);
+  box-sizing: border-box;
 }
 
 #environment-header {
@@ -169,6 +178,39 @@ span.error,
 #results-table {
   background: var(--dp-white);
   border: 1px solid var(--dp-line);
+  width: calc(100% - 80px);
+  table-layout: fixed;
+}
+
+#results-table th,
+#results-table td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#results-table .col-result {
+  width: 65px;
+}
+
+#results-table .col-name {
+  width: auto;
+}
+
+#results-table .col-duration {
+  width: 110px;
+}
+
+.logwrapper {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.logwrapper .logexpander {
+  margin: 10px 8px 10px auto;
+}
+
+.logwrapper .log {
+  padding-right: 12px;
 }
 
 #results-table-head {
@@ -190,6 +232,8 @@ html body > footer {
   padding: 18px 40px 28px;
   font-size: 12px;
   letter-spacing: 0.02em;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 html body > footer::before {
@@ -211,8 +255,13 @@ html body > footer::after {
   background: #0b0b1a;
   color: #e8e8ff;
   border-radius: 6px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
   font-family: "IBM Plex Mono", Consolas, monospace;
   font-size: 12px;
 }

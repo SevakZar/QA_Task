@@ -65,7 +65,7 @@ Each scenario follows a consistent Given / When / Then structure:
 1. **Given:** Select a customer using a predefined `CellNumber` fixture.
 2. **When:** Send an HTTP GET request to `/payment/` using Playwright.
 3. **Then:** Validate HTTP status, response structure, data types and business rules.
-4. **Report:** Log each passed rule; on failure attach HTTP request/response with the rule id.
+4. **Report:** On failure, log HTTP request and response.
 
 Each fixture represents an isolated test condition, allowing scenarios to run independently and consistently.
 
@@ -116,7 +116,7 @@ cp .env.example .env
 
 
 
-### Mock Server
+### Mock Server With Mockoon
 
 Mockoon is used to simulate the Payment API, keeping mock service configuration separate from the test automation code.
 Mockoon must be up on port **8080** before pytest. Two ways:
@@ -133,6 +133,9 @@ Mockoon must be up on port **8080** before pytest. Two ways:
 
 ```bash
 pytest
+pytest -m smoke
+pytest -m regression
+(Or pytest -m "regression and not smoke")
 ```
 
 After you change routes, save/export so `mockoon/checkout-payment.json` is what CI starts.
@@ -211,8 +214,7 @@ The report includes:
 - Execution summary and pass/fail/skip counts.
 - Environment and endpoint information.
 - Expandable test result rows.
-- Passed tests: one log line per rule that passed.
-- Failed tests: full HTTP request and response, plus rule id / method / option / actual.
+- Failed tests include HTTP request and response.
 
 
 
@@ -308,6 +310,5 @@ The workflow uploads the generated HTML report and Allure report as CI artifacts
 The runner is pinned to Ubuntu 24.04 because Playwright 1.55 does not provide a Chromium build for Ubuntu 26.04 (`ubuntu-latest`).
 
 ---
-
 **Digipay Checkout Payment API – Automated Regression Suite**  
 Python · Pytest · Playwright · pytest-bdd · Mockoon · Allure · GitHub Actions

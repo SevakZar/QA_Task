@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import dataclass
 
 from playwright.sync_api import APIRequestContext, APIResponse
-
-LOGGER = logging.getLogger("checkout-api")
 
 
 @dataclass
@@ -52,7 +49,6 @@ class PaymentApi:
             body=body,
             headers=dict(response.headers),
         )
-        LOGGER.debug("GET %s params=%s HTTP %s", url, params, response.status)
         return response.status, body
 
     @staticmethod

@@ -1,7 +1,9 @@
+@regression
 Feature: Checkout payment methods
   The checkout page renders methods returned by GET /payment/.
   Invalid methods or BNPL options must not pass validation.
 
+  @smoke
   Scenario: S01 happy path with online, wallet and bnpl clickable
     Given a checkout customer with cell number "09121111111"
     When the payment methods are requested

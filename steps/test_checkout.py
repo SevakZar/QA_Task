@@ -76,7 +76,6 @@ def validation_fails_with_rule(rule, payment_api, validator):
     except RuleViolation as error:
         if error.rule != rule:
             raise AssertionError(f"expected rule {rule}, got {error.rule}: {error}") from error
-        payment_api.rule_error = error
         validator.log_expected_fail(error.rule, str(error))
         return
     raise AssertionError(f"expected {rule} to fail, but validation passed")
@@ -89,7 +88,6 @@ def fail_fast(rule, payment_api, validator):
     except RuleViolation as error:
         if error.rule != rule:
             raise AssertionError(f"expected rule {rule}, got {error.rule}: {error}") from error
-        payment_api.rule_error = error
         validator.log_expected_fail(error.rule, str(error))
         return
     raise AssertionError(f"expected fast failure {rule}, but the response was accepted")
