@@ -7,7 +7,7 @@
 </p>
 ---
 
-## 1. Project Overview
+## 1. Project Overview 📌
 
 This project provides an API regression test suite for validating Digipay checkout payment methods.
 
@@ -15,7 +15,7 @@ The main objective is to verify API response structure, data integrity, payment 
 
 The suite covers both successful and invalid responses through isolated test data, ensuring deterministic and repeatable test execution without depending on a live environment.
 
-## 2. Test Approach
+## 2. Test Approach 🎯
 
 **Approach A — Mockoon**
 
@@ -23,7 +23,7 @@ Tests call a real HTTP endpoint with Playwright `APIRequestContext`. Each `CellN
 
 Local: Mockoon Desktop. CI: `@mockoon/cli` starts `mockoon/checkout-payment.json` before pytest.
 
-## 3. Test Analysis & Design
+## 3. Test Analysis & Design 🔍
 
 
 
@@ -82,18 +82,18 @@ This approach separates:
 
 This separation improves maintainability and makes it easier to extend the suite with additional scenarios and validation rules.
 
-## 4. Installation & Execution
+## 4. Installation & Execution ⚙️
 
 
 
-### Requirements
+### 📦 Requirements
 
 - Python (see `requirements.txt`)
 - Mockoon Desktop **or** `@mockoon/cli` (must be running on port 8080 before pytest)
 
 
 
-### Setup
+### 🛠️ Setup
 
 ```bash
 python -m venv .venv
@@ -116,7 +116,7 @@ cp .env.example .env
 
 
 
-### Mock Server With Mockoon
+### 🔌 Mock Server With Mockoon
 
 Mockoon is used to simulate the Payment API, keeping mock service configuration separate from the test automation code.
 Mockoon must be up on port **8080** before pytest. Two ways:
@@ -124,7 +124,7 @@ Mockoon must be up on port **8080** before pytest. Two ways:
 1. **Mockoon Desktop (Windows GUI)**
 2. **CLI** (no Desktop install)
 
-**1. Desktop (download from [https://mockoon.com/download/](https://mockoon.com/download/))**
+**1. 🖥️ Desktop (download from [https://mockoon.com/download/](https://mockoon.com/download/))**
 
 1. Open Mockoon Desktop.
 2. Go to File → Open local environment.
@@ -133,14 +133,11 @@ Mockoon must be up on port **8080** before pytest. Two ways:
 
 ```bash
 pytest
-pytest -m smoke
-pytest -m regression
-(Or pytest -m "regression and not smoke")
 ```
 
 After you change routes, save/export so `mockoon/checkout-payment.json` is what CI starts.
 
-**2. CLI (no GUI)**
+**2. ⌨️ CLI (no GUI)**
 
 Needs [Node.js](https://nodejs.org/) (`npx`). Split the terminal:
 
@@ -164,7 +161,24 @@ pytest
 
 Optional check: `http://127.0.0.1:8080/payment/?CellNumber=09121111111`
 
-## 5. Scenarios (`CellNumber`)
+### 🏷️ Pytest tags
+
+Scenarios are tagged in `features/checkout_payment.feature`. Those tags become pytest markers (`pytest.ini`). They select which tests to run; they are not extra Mockoon or install options.
+
+| Tag | Where | What it selects |
+| --- | --- | --- |
+| `@regression` | Feature (all 12 scenarios inherit it) | Full suite |
+| `@smoke` | Scenario S01 only | Fast happy-path check |
+
+```bash
+pytest              # every scenario
+pytest -m smoke     # S01 only
+pytest -m regression
+```
+
+`pytest -m regression` is the same as a plain `pytest` here because the Feature is tagged `@regression`. Use `-m smoke` when you only want the happy path.
+
+## 5. Scenarios (`CellNumber`) 📱
 
 Payloads live in Mockoon. The suite only sends `GET /payment/?CellNumber=…`.
 
@@ -184,10 +198,17 @@ Payloads live in Mockoon. The suite only sends `GET /payment/?CellNumber=…`.
 | 09120000010 | S11 Invalid `price_type`          |
 | 09120000011 | S12 Clickable BNPL, empty options |
 
+**Now (Mockoon):** numbers stay in `features/checkout_payment.feature`. `.env` only needs `BASE_URL`. The Given step sends whatever is quoted: `09121111111` → Mockoon rule S01.
 
+**Real accounts:** copy `.env.example` to `.env`, uncomment `CELL_S01=…` with the real numbers, and change that scenario to:
 
+```gherkin
+Given a checkout customer with cell number "CELL_S01"
+```
 
-## 6. Project Structure
+`os.getenv("CELL_S01")` then replaces the key. If the key is missing, the quoted text is used as the number (current Mockoon path). Do not commit real numbers; `.env` is gitignored.
+
+## 6. Project Structure 🗂️
 
 
 | Directory / File                | Responsibility                                             |
@@ -203,7 +224,7 @@ Payloads live in Mockoon. The suite only sends `GET /payment/?CellNumber=…`.
 
 
 
-## 7. HTML Test Report
+## 7. HTML Test Report 📊
 
 Each pytest execution generates a self-contained HTML report:
 
@@ -237,7 +258,7 @@ pytest
 
 The generated HTML is a static snapshot of the test execution and can be opened directly in a browser without a web server.
 
-## 8. Allure Report
+## 8. Allure Report 📈
 
 The project also generates Allure results for richer test execution analysis.
 
@@ -277,7 +298,7 @@ Each test includes:
 
 Use the standard HTML report for a lightweight execution summary and Allure for more detailed test analysis.
 
-## 9. Assumptions & Validation Rules
+## 9. Assumptions & Validation Rules 📏
 
 The following assumptions were used during test implementation:
 
@@ -291,7 +312,7 @@ The following assumptions were used during test implementation:
 
 
 
-## 10. Continuous Integration (CI)
+## 10. Continuous Integration (CI) 🤖
 
 GitHub Actions executes the regression suite automatically.
 

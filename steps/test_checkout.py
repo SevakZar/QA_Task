@@ -1,3 +1,5 @@
+import os
+
 from pytest_bdd import parsers, scenarios, given, when, then
 
 from validators.errors import RuleViolation
@@ -7,7 +9,7 @@ scenarios("checkout_payment.feature")
 
 @given(parsers.parse('a checkout customer with cell number "{cell_number}"'))
 def checkout_customer(cell_number, payment_api):
-    payment_api.cell_number = cell_number
+    payment_api.cell_number = os.getenv(cell_number, cell_number)
 
 
 @when("the payment methods are requested")
