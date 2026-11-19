@@ -107,6 +107,7 @@ def _attach_http(item):
 def pytest_bdd_before_scenario(request, feature, scenario):
     _ensure_progress(request.node).clear()
     request.node.current_step = None
+    request.node._logged_lines = set()
     allure.dynamic.epic("Digipay")
     allure.dynamic.feature(feature.name)
     allure.dynamic.story(scenario.name)

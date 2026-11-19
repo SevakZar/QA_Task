@@ -29,6 +29,14 @@ class PaymentValidator:
             rules = current.setdefault("rules", [])
             if line not in rules:
                 rules.append(line)
+        if self._node is not None:
+            seen = getattr(self._node, "_logged_lines", None)
+            if seen is None:
+                seen = set()
+                self._node._logged_lines = seen
+            if line in seen:
+                return
+            seen.add(line)
         LOGGER.info(line)
 
     def log_passed(self, rule: str, message: str) -> None:
@@ -66,9 +74,14 @@ class PaymentValidator:
             )
 
         result = ValidationResult()
+        saw_wallet_or_bnpl = False
         for index, method in enumerate(methods):
+            if isinstance(method, dict) and method.get("type") in {"wallet", "bnpl"}:
+                saw_wallet_or_bnpl = True
             self._validate_method(method, index, result)
         self.log_passed("R1", "required method fields and types")
+        if saw_wallet_or_bnpl:
+            self.log_passed("R3", "source_id present and int for wallet/bnpl")
         return result
 
     def _validate_method(self, method, index: int, result: ValidationResult) -> None:
@@ -113,7 +126,6 @@ class PaymentValidator:
                     method=method,
                 )
             self._assert_type(method, "source_id", int, "R3")
-            self.log_passed("R3", "source_id present and int for wallet/bnpl")
 
         if method_type == "bnpl":
             self._validate_bnpl_options(method, result)
@@ -170,17 +182,13 @@ class PaymentValidator:
                     option=option,
                     actual=option["price_type"],
                 )
-            self.log_passed("R7", "price_type is CASH_PRICE or CREDIT_PRICE")
 
             if self.is_eligible(option):
                 eligible.append(option)
-            else:
-                self.log_passed(
-                    "R5",
-                    f"option.source_id={option.get('source_id')} is ineligible",
-                )
 
-        self.log_passed("R5", "inactive or zero-credit options are not eligible")
+        if options:
+            self.log_passed("R7", "price_type is CASH_PRICE or CREDIT_PRICE")
+            self.log_passed("R5", "inactive or zero-credit options are not eligible")
         result.eligible_options_by_method[method["id"]] = eligible
         if eligible:
             defaults = [opt for opt in eligible if opt["is_default"] is True]
