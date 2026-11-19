@@ -305,7 +305,7 @@
         },
         {
           "uuid": "8b5ae5ce-4c4d-4212-b7fc-5a9bd4d42e56",
-          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true\"    }\n  ]\n}\n",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": \"true\"    }\n  ]\n}\n",
           "latency": 0,
           "statusCode": 200,
           "label": "S10 wallet without source_id violates R3 - CellNumber: 09120000009",
