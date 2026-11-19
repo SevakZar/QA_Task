@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "74548e69-f71f-409a-9b69-0bcd7b34fc6c",
-          "body": "{\n  \"status\": 300,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true,\n      \"source_id\": 316\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": false,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 1,\n      \"type\": \"online\",\n      \"title\": \"Online Payment\",\n      \"is_clickable\": true\n    },\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true,\n      \"source_id\": 316\n    },\n    {\n      \"id\": 8,\n      \"type\": \"bnpl\",\n      \"title\": \"Credit Payment\",\n      \"is_clickable\": true,\n      \"source_id\": 367,\n      \"options\": [\n        {\n          \"source_id\": 386,\n          \"title\": \"1 installment\",\n          \"credit\": 50000000,\n          \"is_active\": true,\n          \"is_default\": true,\n          \"price_type\": \"CASH_PRICE\"\n        },\n        {\n          \"source_id\": 387,\n          \"title\": \"3 installments\",\n          \"credit\": 409361033,\n          \"is_active\": true,\n          \"is_default\": false,\n          \"price_type\": \"CREDIT_PRICE\"\n        }\n      ]\n    }\n  ]\n}\n",
           "latency": 0,
           "statusCode": 200,
           "label": "S01 happy path with online, wallet and bnpl clickable - CellNumber: 09121111111",
@@ -305,7 +305,7 @@
         },
         {
           "uuid": "8b5ae5ce-4c4d-4212-b7fc-5a9bd4d42e56",
-          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true\",\n      \"is_default\": 1\n    }\n  ]\n}\n",
+          "body": "{\n  \"status\": 200,\n  \"payment_methods\": [\n    {\n      \"id\": 11,\n      \"type\": \"wallet\",\n      \"title\": \"Digital Wallet\",\n      \"is_clickable\": true\"    }\n  ]\n}\n",
           "latency": 0,
           "statusCode": 200,
           "label": "S10 wallet without source_id violates R3 - CellNumber: 09120000009",
