@@ -8,6 +8,8 @@ reports/*.html
 reports/*.xml
 reports/allure-results/
 reports/allure-report/
+reports/performance-report/*.html
+reports/performance-report/*.json
 !reports/.gitkeep
 !reports/assets/
 *.pyc

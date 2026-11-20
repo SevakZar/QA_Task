@@ -1,5 +1,8 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
+import { handleHtmlSummary } from "./summary.js";
+
+export const handleSummary = handleHtmlSummary("load");
 
 const BASE_URL = (__ENV.BASE_URL || "http://127.0.0.1:8080").replace(/\/$/, "");
 const CELL_NUMBER = __ENV.CELL_NUMBER || "09121111111";
@@ -26,6 +29,3 @@ export default function () {
 
   sleep(1);
 }
-
-
-//k6 run performance/payment_load_test.js

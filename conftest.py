@@ -157,6 +157,10 @@ def pytest_bdd_step_error(request, feature, scenario, step, step_func, step_func
     _attach_http(request.node)
 
 
+def pytest_html_report_title(report):
+    report.title = "Digipay · Checkout Payment API — pytest HTML Report"
+
+
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield

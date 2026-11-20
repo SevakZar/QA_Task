@@ -20,7 +20,7 @@ css = """@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wgh
 }
 
 html {
-  background: var(--dp-blue);
+  background: var(--dp-paper);
   overflow-x: hidden;
 }
 
@@ -79,6 +79,13 @@ body > p:first-of-type {
   color: #d6d6ff;
   border-bottom: 3px solid var(--dp-white);
   font-size: 13px;
+}
+
+body > p:first-of-type::before {
+  content: "Functional regression of GET /payment/ · pytest-bdd + Playwright · Mockoon";
+  display: block;
+  margin-bottom: 8px;
+  color: #d6d6ff;
 }
 
 body > p:first-of-type a {

@@ -13,7 +13,7 @@
 }
 
 html {
-  background: var(--dp-blue);
+  background: var(--dp-paper);
   overflow-x: hidden;
 }
 
@@ -72,6 +72,13 @@ body > p:first-of-type {
   color: #d6d6ff;
   border-bottom: 3px solid var(--dp-white);
   font-size: 13px;
+}
+
+body > p:first-of-type::before {
+  content: "Functional regression of GET /payment/ · pytest-bdd + Playwright · Mockoon";
+  display: block;
+  margin-bottom: 8px;
+  color: #d6d6ff;
 }
 
 body > p:first-of-type a {
@@ -240,6 +247,37 @@ html body > footer::before {
 html body > footer::after {
   content: "Local suite · Playwright APIRequestContext · pytest-html";
   display: block;
+}
+
+.http-dump {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  background: #0b0b1a;
+  color: #e8e8ff;
+  border-radius: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.http-dump .log-step {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.http-dump .log-rule {
+  color: #b8b8ff;
+}
+
+.http-dump .log-fail {
+  color: #ff4d6d;
+  font-weight: 600;
 }
 
 th:last-child:is(:has(+ *)),
