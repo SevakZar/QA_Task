@@ -1,18 +1,7 @@
-# Checkout Payment API Automation
+# <img src="MyDigiPay.png" width="40" alt="Digipay Logo"> Checkout Payment API Automation
 
-<table>
-  <tr>
-    <td width="1%" nowrap>
-      <img src="MyDigiPay.png" width="40" alt="Digipay Logo">
-    </td>
-    <td>
-      <strong>API Regression Test Suite for Digipay Checkout Payment Methods</strong><br>
-      Automated validation of <code>GET /payment/</code> using Python, Pytest and Playwright.
-    </td>
-  </tr>
-</table>
-
----
+**API Regression Test Suite for Digipay Checkout Payment Methods**
+Automated validation of `GET /payment/` using Python, Pytest and Playwright.
 
 ## 1. Project Overview 📌
 
