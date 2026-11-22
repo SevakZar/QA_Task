@@ -11,24 +11,46 @@ function fmtValue(metric, key, value) {
   if (value == null) {
     return "-";
   }
+
   if (typeof value !== "number") {
     return String(value);
   }
+
   if (metric.contains === "time") {
     return `${value.toFixed(2)} ms`;
   }
+
   if (metric.contains === "data") {
     if (value >= 1024) {
       return `${(value / 1024).toFixed(1)} kB`;
     }
+
     return `${Math.round(value)} B`;
   }
-  if (key === "rate" || metric.type === "rate") {
-    return `${(value * 100).toFixed(2)}%`;
+
+  // Rate metric: display rate as percentage,
+  // but passes and fails as counts
+  if (metric.type === "rate") {
+    if (key === "rate") {
+      return `${(value * 100).toFixed(2)}%`;
+    }
+
+    if (key === "passes" || key === "fails") {
+      return Number.isInteger(value)
+        ? String(value)
+        : value.toFixed(2);
+    }
   }
+
+  // Counter metric: rate means events per second
+  if (metric.type === "counter" && key === "rate") {
+    return `${value.toFixed(2)}/s`;
+  }
+
   if (Number.isInteger(value)) {
     return String(value);
   }
+
   return value.toFixed(2);
 }
 
