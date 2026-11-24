@@ -88,6 +88,7 @@ def _ensure_progress(node) -> list:
         node.progress_log = progress
     return progress
 
+# Allure Metadata
 
 def _attach_http(item):
     api = getattr(item, "payment_api", None)
@@ -101,8 +102,6 @@ def _attach_http(item):
         name="Request / response",
         attachment_type=allure.attachment_type.TEXT,
     )
-
-# Allure Metadata
 
 def pytest_bdd_before_scenario(request, feature, scenario):
     _ensure_progress(request.node).clear()
